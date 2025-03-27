@@ -1,0 +1,61 @@
+version: "3.7"
+
+networks:
+  harness-dev:
+    driver: bridge
+volumes:
+  harness-redis-volume:
+
+services:
+  kafdrop:
+    image: "obsidiandynamics/kafdrop:latest"
+    depends_on:
+      - kafka1
+    ports:
+      - "19000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka1:19092"
+    networks:
+      - harness-dev
+
+  kafka1:
+    image: confluentinc/cp-kafka:7.7.1
+    networks:
+      - harness-dev
+    hostname: kafka1
+    container_name: kafka1
+    ports:
+      - "39092:39092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://kafka1:19092,SASL_PLAINTEXT_HOST://kafka1:39092,CONTROLLER://kafka1:29093
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka1:19092,SASL_PLAINTEXT_HOST://localhost:39092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      # KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT_HOST:SASL_PLAINTEXT
+      KAFKA_PROCESS_ROLES: 'controller,broker'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka1:29093'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
+      # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
+      CLUSTER_ID: 'ckjPoprWQzOf0-FuNkGfFQ'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SASL_MECHANISM: PLAIN
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      # KAFKA_SASL_JAAS_CONFIG: |
+      #   org.apache.kafka.common.security.plain.PlainLoginModule required
+      #   username="KAFKA-USERNAME"
+      #   password="KAFKA-PASSWORD";
+      # KAFKA_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_jaas.conf"
+    volumes:
+      - ./kafka_server_jaas.conf:/etc/kafka/kafka_jaas.conf
+
+  harness-redis:
+    image: "redis:6"
+    command: redis-server --port 6379 --save 60 1 --loglevel notice
+    ports:
+      - 6379:6379
+    volumes:
+      - harness-redis-volume:/data
