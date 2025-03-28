@@ -54,7 +54,7 @@ func startKafkaConsumer() *kafka.Reader {
 			l.Error("Kafka Consumer Error:", err)
 			continue
 		}
-		l.Infof("Kafka Consumer %d received: Key=%s, Value=%s, Partition=%d, Latency=%s", r.Stats().ClientID, string(msg.Key), string(msg.Value), msg.Partition, time.Now().Sub(msgTime))
+		l.Infof("Kafka Stream Consumer received: Key=%s, Value=%s, Partition=%d, Latency=%s", string(msg.Key), string(msg.Value), msg.Partition, time.Now().Sub(msgTime))
 	}
 }
 
@@ -70,9 +70,9 @@ func startKafkaProducer() *kafka.Writer {
 }
 
 func sendKafkaMessages() {
-	messageKeys := []string{"aosdfji", "poosdakf", "accountId", "accountId", "accountId", "accountId", "accountId"}
+	messageKeys := []string{"UO9JEgfeQUGLrqAsIrR1Ug", "UO9JEgfeQUGLrqAsIrR1Ug", "NWR7SyTESuC5NnJdASUFNg", "NWR7SyTESuC5NnJdASUFNg", "NWR7SyTESuC5NnJdASUFNg", "UO9JEgfeQUGLrqAsIrR1Ug", "NWR7SyTESuC5NnJdASUFNg"}
 	for i, messageKey := range messageKeys {
-		msg := fmt.Sprintf("msg-%d", i)
+		msg := fmt.Sprintf("msg-order-%d", i)
 		if err := kafkaWriter.WriteMessages(context.Background(), kafka.Message{
 			Key:   []byte(messageKey),
 			Value: []byte(msg),

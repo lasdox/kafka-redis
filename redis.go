@@ -27,7 +27,7 @@ func sendRedisStreamMessages(client *redis.Client) {
 	pipe := client.Pipeline()
 
 	for i := 0; i < 5; i++ {
-		msg := fmt.Sprintf("msg-%d", i) // You can also use unique message identifiers
+		msg := fmt.Sprintf("msg-index-%d", i) // You can also use unique message identifiers
 		timestampStr := fmt.Sprintf("%d", time.Now().Unix())
 		pipe.XAdd(context.Background(), &redis.XAddArgs{
 			Stream: redisStream,
@@ -57,7 +57,7 @@ func startRedisStreamConsumer(client *redis.Client, id int) {
 			Consumer: fmt.Sprintf("%s-%d", redisConsumer, id),
 			Streams:  []string{redisStream, ">"},
 			Count:    10,
-			Block:    0,
+			Block:    50,
 		}).Result()
 		if err != nil {
 			l.Error("Redis Stream Consumer Error:", err)

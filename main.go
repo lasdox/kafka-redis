@@ -24,12 +24,12 @@ func main() {
 	l.Info("Started Redis Client")
 
 	// Start multiple Kafka Consumers
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 4; i++ {
 		go startKafkaConsumer()
 	}
 
 	// Start multiple Redis Stream Consumers
-	for i := 0; i < 2; i++ {
+	for i := 0; i < 4; i++ {
 		go startRedisStreamConsumer(redisClient, i)
 	}
 
